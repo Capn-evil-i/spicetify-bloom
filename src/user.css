@@ -2774,6 +2774,57 @@ div:has(> [data-testid="home-page"]) > div:nth-child(3) > div:first-child {
   background-color: rgb(8, 10, 11) !important;
 }
 
+/* Bloom spaces card grids with `.main-gridContainer-gridContainer { gap: 0.5rem; }`. Spotify 1.3's
+   home and shelf rows are carousels on a separate grid, so their cards ended up touching. */
+div:has(> [data-carousel-gridlist-item]) {
+  gap: 0.5rem;
+}
+
+/* Spotify 1.3 pads .Root__now-playing-bar by --panel-gap. Bloom's floating bar is absolutely
+   positioned inside it, so that padding pushed it 8px right: 16px margin left, none on the right. */
+.Root__now-playing-bar {
+  padding: 0;
+}
+
+/* Bloom's page bar (.main-topBar-container, 2.5rem, opaque) sits over the top of the page, and
+   Spotify 1.3 starts entity headers flush with the top, so the bar covered the top of the cover. */
+.main-entityHeader-containerNormal {
+  margin-top: 2.5rem;
+}
+
+/* Spotify bleeds the sticky track list header past the list by the content spacing. Inside
+   Bloom's boxed track list that made it stick out on both sides, so it stays within the box. */
+.main-trackList-trackListHeader {
+  margin-inline: 0;
+  padding-inline: 0;
+}
+
+/* Bloom nudges What's New down by `top: 2px` for its old 36px bar; Spotify 1.3's bar already
+   centres its buttons (the Listening activity port skips this nudge for the same reason). */
+.Root__globalNav button[aria-label="What's New"] {
+  top: 0;
+}
+
+/* Spotify 1.3 hides the shortcut tiles' play button by fading its inner circle, which Bloom
+   hides to draw its own icon on the button itself, so Bloom's icon showed on every tile at
+   rest. The button takes the tile's own hover/focus reveal instead. */
+.qqdeiPoFoM_sPX0pRHsT .SydbRAmFUdPUwVFV47xp .main-playButton-PlayButton > button {
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.qqdeiPoFoM_sPX0pRHsT:hover .SydbRAmFUdPUwVFV47xp .main-playButton-PlayButton > button,
+.qqdeiPoFoM_sPX0pRHsT:focus-within .SydbRAmFUdPUwVFV47xp .main-playButton-PlayButton > button {
+  opacity: 1;
+}
+
+/* Spotify's solid play circle covers the now-playing equaliser when it appears; Bloom's icon is
+   only the glyph, so the equaliser steps aside while the button is revealed. */
+.qqdeiPoFoM_sPX0pRHsT:hover .O6l0stovRqzSnYxDqSei,
+.qqdeiPoFoM_sPX0pRHsT:focus-within .O6l0stovRqzSnYxDqSei {
+  opacity: 0;
+}
+
 div:has(> [data-testid="home-page"]) > div:first-child,
 .playlist-playlist-actionBarBackground-background {
   background-image: none;
