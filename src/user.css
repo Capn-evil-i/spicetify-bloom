@@ -2774,10 +2774,15 @@ div:has(> [data-testid="home-page"]) > div:nth-child(3) > div:first-child {
   background-color: rgb(8, 10, 11) !important;
 }
 
-/* Bloom spaces card grids with `.main-gridContainer-gridContainer { gap: 0.5rem; }`. Spotify 1.3's
-   home and shelf rows are carousels on a separate grid, so their cards ended up touching. */
+/* Card grids in carousels: Spotify 1.3 computes column widths without gap. Adding gap to the container
+   overflows the row and clips the last card. Instead, space items with inset padding so the row width is preserved. */
 div:has(> [data-carousel-gridlist-item]) {
-  gap: 0.5rem;
+  gap: 0 !important;
+}
+
+[data-carousel-gridlist-item] {
+  padding-inline: 0.25rem;
+  box-sizing: border-box;
 }
 
 /* Spotify 1.3 pads .Root__now-playing-bar by --panel-gap. Bloom's floating bar is absolutely
@@ -2793,10 +2798,35 @@ div:has(> [data-carousel-gridlist-item]) {
 }
 
 /* Spotify bleeds the sticky track list header past the list by the content spacing. Inside
-   Bloom's boxed track list that made it stick out on both sides, so it stays within the box. */
+   Bloom's boxed track list that made it stick out on both sides. Keep it inside the box. */
 .main-trackList-trackListHeader {
-  margin-inline: 0;
-  padding-inline: 0;
+  margin-inline: 0 !important;
+  padding-inline: 0 !important;
+}
+
+/* When stuck, give the header an opaque acrylic card background so tracks scrolling behind it
+   do not peek through the bottom margin or transparent gaps. */
+.main-trackList-trackListHeaderStuck,
+.main-trackList-trackListHeaderStuck.main-trackList-trackListHeader {
+  background-color: var(--spice-card) !important;
+  background: var(--spice-card) !important;
+  backdrop-filter: blur(var(--blur-radius, 3rem)) !important;
+  -webkit-backdrop-filter: blur(var(--blur-radius, 3rem)) !important;
+  border-bottom: 1px solid var(--spice-contour, rgba(255, 255, 255, 0.08)) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25) !important;
+  margin-bottom: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+.main-trackList-trackListHeaderStuck .main-trackList-trackListHeaderRow {
+  background-color: transparent !important;
+}
+
+/* Sticky topbar separation and translucent backdrop */
+.main-topBar-background {
+  backdrop-filter: blur(var(--blur-radius, 3rem)) !important;
+  -webkit-backdrop-filter: blur(var(--blur-radius, 3rem)) !important;
+  border-bottom: 1px solid var(--spice-contour, rgba(255, 255, 255, 0.08)) !important;
 }
 
 /* Bloom nudges What's New down by `top: 2px` for its old 36px bar; Spotify 1.3's bar already
@@ -2825,18 +2855,9 @@ div:has(> [data-carousel-gridlist-item]) {
   opacity: 0;
 }
 
-div:has(> [data-testid="home-page"]) > div:first-child,
-.playlist-playlist-actionBarBackground-background {
-  background-image: none;
-}
-
-.playlist-playlist-actionBarBackground-background,
 div:has(> [data-testid="home-page"]) > div:first-child {
+  background-image: none;
   background-color: var(--spice-main) !important;
-}
-
-.playlist-playlist-actionBarBackground-background {
-  background: none !important;
 }
 
 [data-testid="home-page"] .contentSpacing > section {
