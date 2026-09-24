@@ -1507,9 +1507,14 @@ input:checked~.x-toggle-indicatorWrapper .x-toggle-indicator {
   transition: none;
 }
 
-.main-playPauseButton-button,
 .player-controls__buttons button:not(.main-playPauseButton-button) {
   --button-size: 28px !important;
+}
+
+.main-playPauseButton-button {
+  --button-size: 32px !important;
+  width: var(--button-size) !important;
+  height: var(--button-size) !important;
 }
 
 .main-seekBack15sButton-button,
@@ -1538,8 +1543,8 @@ input:checked~.x-toggle-indicatorWrapper .x-toggle-indicator {
   -webkit-mask-repeat: no-repeat !important;
   mask-position: center center !important; 
   -webkit-mask-position: center center !important;
-  mask-size: 60% !important; 
-  -webkit-mask-size: 60% !important;
+  mask-size: 85% !important; 
+  -webkit-mask-size: 85% !important;
   background-repeat: no-repeat !important;
   background-position: center center !important;
 
@@ -1554,8 +1559,8 @@ input:checked~.x-toggle-indicatorWrapper .x-toggle-indicator {
   -webkit-mask-repeat: no-repeat !important;
   mask-position: center center !important; 
   -webkit-mask-position: center center !important;
-  mask-size: 60% !important; 
-  -webkit-mask-size: 60% !important;
+  mask-size: 85% !important; 
+  -webkit-mask-size: 85% !important;
   background-repeat: no-repeat !important; 
   background-position: center center !important;
 
