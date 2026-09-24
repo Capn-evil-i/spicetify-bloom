@@ -2757,6 +2757,34 @@ div:has(> * > * > * > .main-card-cardContainer) .main-card-cardContainer {
   height: 100%;
 }
 
+/* Prevent carousel wrappers from clipping card bottoms, multi-line subtitles, and hover states */
+div:has(> * > * > * > .main-card-cardContainer),
+div:has(> * > * > .main-card-cardContainer),
+div:has(> * > .main-card-cardContainer),
+[data-carousel-gridlist-item] {
+  overflow: visible !important;
+}
+
+.search-searchCategory-categoryGrid,
+.search-searchCategory-contentArea {
+  overflow-y: visible !important;
+}
+
+.main-card-cardContainer {
+  box-sizing: border-box !important;
+  padding-bottom: 12px !important;
+}
+
+/* In global-nav Spotify 1.3, remove the main view's top/bottom box-shadow pseudo-element which caused an 8px vertical height mismatch against the sidebars */
+.global-nav .Root__main-view::before {
+  display: none !important;
+  box-shadow: none !important;
+}
+
+.global-nav .Root__right-sidebar {
+  margin-bottom: calc(var(--now-playing-bar-height) - 2rem);
+}
+
 /* Bloom shrinks the page top bar to 2.5rem but still pinned the track list header at 64px,
    leaving a strip where rows scrolled through between the two. */
 .global-nav .main-view-container .main-trackList-trackListHeader {
@@ -2805,7 +2833,7 @@ div:has(> [data-carousel-gridlist-item]) {
 }
 
 /* When stuck, give the header an opaque acrylic card background so tracks scrolling behind it
-   do not peek through the bottom margin or transparent gaps. */
+   do not peek through the bottom margin or transparent gaps, with distinct elevation and border. */
 .main-trackList-trackListHeaderStuck,
 .main-trackList-trackListHeaderStuck.main-trackList-trackListHeader {
   background-color: var(--spice-card) !important;
@@ -2813,7 +2841,7 @@ div:has(> [data-carousel-gridlist-item]) {
   backdrop-filter: blur(var(--blur-radius, 3rem)) !important;
   -webkit-backdrop-filter: blur(var(--blur-radius, 3rem)) !important;
   border-bottom: 1px solid var(--spice-contour, rgba(255, 255, 255, 0.08)) !important;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35) !important;
   margin-bottom: 0 !important;
   padding-bottom: 0 !important;
 }
@@ -2822,10 +2850,12 @@ div:has(> [data-carousel-gridlist-item]) {
   background-color: transparent !important;
 }
 
-/* Sticky topbar separation and translucent backdrop */
+/* Sticky topbar separation and translucent acrylic backdrop so album ambient color shines through */
 .main-topBar-background {
-  backdrop-filter: blur(var(--blur-radius, 3rem)) !important;
-  -webkit-backdrop-filter: blur(var(--blur-radius, 3rem)) !important;
+  background-color: rgba(var(--spice-rgb-sidebar, 18, 19, 22), 0.75) !important;
+  background: rgba(var(--spice-rgb-sidebar, 18, 19, 22), 0.75) !important;
+  backdrop-filter: blur(20px) saturate(160%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(160%) !important;
   border-bottom: 1px solid var(--spice-contour, rgba(255, 255, 255, 0.08)) !important;
 }
 
@@ -2836,16 +2866,24 @@ div:has(> [data-carousel-gridlist-item]) {
 }
 
 /* Spotify 1.3 hides the shortcut tiles' play button by fading its inner circle, which Bloom
-   hides to draw its own icon on the button itself, so Bloom's icon showed on every tile at
-   rest. The button takes the tile's own hover/focus reveal instead. */
+   hides to draw its own icon on the button itself. Reveal instantly on hover with hardware acceleration. */
 .qqdeiPoFoM_sPX0pRHsT .SydbRAmFUdPUwVFV47xp .main-playButton-PlayButton > button {
   opacity: 0;
-  transition: opacity 0.3s;
+  transform: translateZ(0);
+  will-change: opacity, transform;
+  transition: opacity 0.12s cubic-bezier(0, 0, 0.2, 1), transform 0.12s cubic-bezier(0, 0, 0.2, 1) !important;
 }
 
 .qqdeiPoFoM_sPX0pRHsT:hover .SydbRAmFUdPUwVFV47xp .main-playButton-PlayButton > button,
 .qqdeiPoFoM_sPX0pRHsT:focus-within .SydbRAmFUdPUwVFV47xp .main-playButton-PlayButton > button {
   opacity: 1;
+}
+
+.main-playButton-PlayButton,
+.main-playButton-PlayButton > button,
+.main-card-PlayButtonContainer {
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }
 
 /* Spotify's solid play circle covers the now-playing equaliser when it appears; Bloom's icon is
