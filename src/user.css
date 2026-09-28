@@ -1507,14 +1507,9 @@ input:checked~.x-toggle-indicatorWrapper .x-toggle-indicator {
   transition: none;
 }
 
+.main-playPauseButton-button,
 .player-controls__buttons button:not(.main-playPauseButton-button) {
   --button-size: 28px !important;
-}
-
-.main-playPauseButton-button {
-  --button-size: 32px !important;
-  width: var(--button-size) !important;
-  height: var(--button-size) !important;
 }
 
 .main-seekBack15sButton-button,
@@ -1543,8 +1538,8 @@ input:checked~.x-toggle-indicatorWrapper .x-toggle-indicator {
   -webkit-mask-repeat: no-repeat !important;
   mask-position: center center !important; 
   -webkit-mask-position: center center !important;
-  mask-size: 85% !important; 
-  -webkit-mask-size: 85% !important;
+  mask-size: 60% !important; 
+  -webkit-mask-size: 60% !important;
   background-repeat: no-repeat !important;
   background-position: center center !important;
 
@@ -1559,8 +1554,8 @@ input:checked~.x-toggle-indicatorWrapper .x-toggle-indicator {
   -webkit-mask-repeat: no-repeat !important;
   mask-position: center center !important; 
   -webkit-mask-position: center center !important;
-  mask-size: 85% !important; 
-  -webkit-mask-size: 85% !important;
+  mask-size: 60% !important; 
+  -webkit-mask-size: 60% !important;
   background-repeat: no-repeat !important; 
   background-position: center center !important;
 
@@ -2762,34 +2757,6 @@ div:has(> * > * > * > .main-card-cardContainer) .main-card-cardContainer {
   height: 100%;
 }
 
-/* Prevent carousel wrappers from clipping card bottoms, multi-line subtitles, and hover states */
-div:has(> * > * > * > .main-card-cardContainer),
-div:has(> * > * > .main-card-cardContainer),
-div:has(> * > .main-card-cardContainer),
-[data-carousel-gridlist-item] {
-  overflow: visible !important;
-}
-
-.search-searchCategory-categoryGrid,
-.search-searchCategory-contentArea {
-  overflow-y: visible !important;
-}
-
-.main-card-cardContainer {
-  box-sizing: border-box !important;
-  padding-bottom: 12px !important;
-}
-
-/* In global-nav Spotify 1.3, remove the main view's top/bottom box-shadow pseudo-element which caused an 8px vertical height mismatch against the sidebars */
-.global-nav .Root__main-view::before {
-  display: none !important;
-  box-shadow: none !important;
-}
-
-.global-nav .Root__right-sidebar {
-  margin-bottom: calc(var(--now-playing-bar-height) - 2rem);
-}
-
 /* Bloom shrinks the page top bar to 2.5rem but still pinned the track list header at 64px,
    leaving a strip where rows scrolled through between the two. */
 .global-nav .main-view-container .main-trackList-trackListHeader {
@@ -2807,15 +2774,12 @@ div:has(> [data-testid="home-page"]) > div:nth-child(3) > div:first-child {
   background-color: rgb(8, 10, 11) !important;
 }
 
-/* Card grids in carousels: Spotify 1.3 computes column widths without gap. Adding gap to the container
-   overflows the row and clips the last card. Instead, space items with inset padding so the row width is preserved. */
-div:has(> [data-carousel-gridlist-item]) {
-  gap: 0 !important;
-}
-
+/* Bloom spaces card grids with `.main-gridContainer-gridContainer { gap: 0.5rem; }`. Spotify 1.3's
+   home and shelf rows are carousels on a separate grid, so their cards ended up touching. That
+   grid sizes its columns for cards that touch, so a gap would push the last visible card past
+   the edge; each item takes half the gap on either side instead, keeping the row width. */
 [data-carousel-gridlist-item] {
   padding-inline: 0.25rem;
-  box-sizing: border-box;
 }
 
 /* Spotify 1.3 pads .Root__now-playing-bar by --panel-gap. Bloom's floating bar is absolutely
@@ -2831,37 +2795,10 @@ div:has(> [data-carousel-gridlist-item]) {
 }
 
 /* Spotify bleeds the sticky track list header past the list by the content spacing. Inside
-   Bloom's boxed track list that made it stick out on both sides. Keep it inside the box. */
+   Bloom's boxed track list that made it stick out on both sides, so it stays within the box. */
 .main-trackList-trackListHeader {
-  margin-inline: 0 !important;
-  padding-inline: 0 !important;
-}
-
-/* When stuck, give the header an opaque acrylic card background so tracks scrolling behind it
-   do not peek through the bottom margin or transparent gaps, with distinct elevation and border. */
-.main-trackList-trackListHeaderStuck,
-.main-trackList-trackListHeaderStuck.main-trackList-trackListHeader {
-  background-color: var(--spice-card) !important;
-  background: var(--spice-card) !important;
-  backdrop-filter: blur(var(--blur-radius, 3rem)) !important;
-  -webkit-backdrop-filter: blur(var(--blur-radius, 3rem)) !important;
-  border-bottom: 1px solid var(--spice-contour, rgba(255, 255, 255, 0.08)) !important;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35) !important;
-  margin-bottom: 0 !important;
-  padding-bottom: 0 !important;
-}
-
-.main-trackList-trackListHeaderStuck .main-trackList-trackListHeaderRow {
-  background-color: transparent !important;
-}
-
-/* Sticky topbar separation and translucent acrylic backdrop so album ambient color shines through */
-.main-topBar-background {
-  background-color: rgba(var(--spice-rgb-sidebar, 18, 19, 22), 0.75) !important;
-  background: rgba(var(--spice-rgb-sidebar, 18, 19, 22), 0.75) !important;
-  backdrop-filter: blur(20px) saturate(160%) !important;
-  -webkit-backdrop-filter: blur(20px) saturate(160%) !important;
-  border-bottom: 1px solid var(--spice-contour, rgba(255, 255, 255, 0.08)) !important;
+  margin-inline: 0;
+  padding-inline: 0;
 }
 
 /* Bloom nudges What's New down by `top: 2px` for its old 36px bar; Spotify 1.3's bar already
@@ -2871,24 +2808,17 @@ div:has(> [data-carousel-gridlist-item]) {
 }
 
 /* Spotify 1.3 hides the shortcut tiles' play button by fading its inner circle, which Bloom
-   hides to draw its own icon on the button itself. Reveal instantly on hover with hardware acceleration. */
+   hides to draw its own icon on the button itself, so Bloom's icon showed on every tile at
+   rest. The button takes the tile's own hover/focus reveal instead, with a short fade because
+   Spotify's 0.3s one read as a delay. */
 .qqdeiPoFoM_sPX0pRHsT .SydbRAmFUdPUwVFV47xp .main-playButton-PlayButton > button {
   opacity: 0;
-  transform: translateZ(0);
-  will-change: opacity, transform;
-  transition: opacity 0.12s cubic-bezier(0, 0, 0.2, 1), transform 0.12s cubic-bezier(0, 0, 0.2, 1) !important;
+  transition: opacity 0.1s;
 }
 
 .qqdeiPoFoM_sPX0pRHsT:hover .SydbRAmFUdPUwVFV47xp .main-playButton-PlayButton > button,
 .qqdeiPoFoM_sPX0pRHsT:focus-within .SydbRAmFUdPUwVFV47xp .main-playButton-PlayButton > button {
   opacity: 1;
-}
-
-.main-playButton-PlayButton,
-.main-playButton-PlayButton > button,
-.main-card-PlayButtonContainer {
-  transform: translateZ(0);
-  backface-visibility: hidden;
 }
 
 /* Spotify's solid play circle covers the now-playing equaliser when it appears; Bloom's icon is
@@ -2898,9 +2828,60 @@ div:has(> [data-carousel-gridlist-item]) {
   opacity: 0;
 }
 
-div:has(> [data-testid="home-page"]) > div:first-child {
+/* Bloom's .Root__main-view::before draws 8px sidebar-coloured bands above and below the main
+   view to square off its corners. Spotify 1.3 separates the panels with gaps, so the bands
+   sat in those gaps and made the main view look 8px taller than the sidebars. */
+.Root__main-view::before {
+  display: none;
+}
+
+/* Bloom lifts the main view and library above the floating player with
+   `margin-bottom: calc(var(--now-playing-bar-height) - 2rem)`. Spotify 1.3's right panel
+   (Now Playing / queue) is new, so it gets the same margin to end level with them. */
+.Root__right-sidebar {
+  margin-bottom: calc(var(--now-playing-bar-height) - 2rem);
+}
+
+/* Old Spotify painted the stuck track list header with var(--background-highlight), and Bloom
+   maps that variable to --spice-selected-row. Inside Bloom's boxed track list the header row
+   also carries the card colour, so it's cleared while stuck to let the highlight show. */
+.main-trackList-trackList {
+  --background-highlight: var(--spice-selected-row);
+}
+
+.main-trackList-trackListHeader.KB1xjImp9AFi7u_IFqNt .main-trackList-trackListHeaderRow {
+  background-color: transparent;
+}
+
+/* Bloom gives the main view `height: 100%` next to its `margin-bottom` above the player. In
+   Spotify 1.3 the main view is a grid item, where 100% is the whole row, so the margin landed
+   outside the view: it ran 58px lower than the sidebars and the end of each page sat hidden
+   behind the player. Letting the grid size it makes Bloom's margin apply again. */
+.Root__main-view {
+  height: auto;
+}
+
+/* Bloom clears the floating player with `.main-view-container__scroll-node-child
+   { padding-bottom: 6rem }`. Spotify 1.3 fixes that element at height: 100%, so long pages
+   overflowed it instead of growing it: the padding sat mid-page and the last ~60px of a page
+   could not be scrolled into view. It grows with the page again, and still fills short ones. */
+.main-view-container__scroll-node-child {
+  height: auto;
+  min-height: 100%;
+}
+
+div:has(> [data-testid="home-page"]) > div:first-child,
+.playlist-playlist-actionBarBackground-background {
   background-image: none;
+}
+
+.playlist-playlist-actionBarBackground-background,
+div:has(> [data-testid="home-page"]) > div:first-child {
   background-color: var(--spice-main) !important;
+}
+
+.playlist-playlist-actionBarBackground-background {
+  background: none !important;
 }
 
 [data-testid="home-page"] .contentSpacing > section {
@@ -3376,127 +3357,4 @@ aside[aria-label="Friend Activity"] button[data-testid="user-widget-link"] > fig
 
 form.e-10860-form-input-icon[role="search"] {
 
-}
-
-/* ===== FIXES FOR SPOTIFY 1.3 BLOOM ===== */
-
-/* 1. Sticky Topbar Translucent Acrylic Blur */
-.Root .main-topBar-background {
-  background-color: rgba(var(--spice-rgb-sidebar, 18, 19, 22), 0.7) !important;
-  background: rgba(var(--spice-rgb-sidebar, 18, 19, 22), 0.7) !important;
-  backdrop-filter: blur(24px) saturate(160%) !important;
-  -webkit-backdrop-filter: blur(24px) saturate(160%) !important;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
-}
-
-/* 2. Stuck Tracklist Header Elevation & Separation (Spotify 1.3 KB1xjImp9AFi7u_IFqNt class support) */
-.Root .main-trackList-trackListHeader {
-  margin-inline: 0 !important;
-  padding-inline: 0 !important;
-}
-
-.Root .main-trackList-trackListHeader.KB1xjImp9AFi7u_IFqNt,
-.Root .main-trackList-trackListHeaderStuck,
-.Root .main-trackList-trackListHeaderStuck.main-trackList-trackListHeader {
-  background-color: rgba(var(--spice-rgb-card, 33, 35, 43), 0.92) !important;
-  background: rgba(var(--spice-rgb-card, 33, 35, 43), 0.92) !important;
-  backdrop-filter: blur(24px) saturate(140%) !important;
-  -webkit-backdrop-filter: blur(24px) saturate(140%) !important;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4) !important;
-  margin-bottom: 0 !important;
-  padding-bottom: 0 !important;
-}
-
-.Root .KB1xjImp9AFi7u_IFqNt .main-trackList-trackListHeaderRow,
-.Root .main-trackList-trackListHeaderStuck .main-trackList-trackListHeaderRow {
-  background-color: transparent !important;
-}
-
-/* 3. Play Button Instant Hardware-Accelerated Hover (Eliminate lag, delays, and frame drops) */
-.Root .main-card-card,
-.Root .main-card-cardContainer {
-  transition: transform 0.15s cubic-bezier(0, 0, 0.2, 1), box-shadow 0.15s cubic-bezier(0, 0, 0.2, 1) !important;
-  will-change: transform !important;
-}
-
-.Root .main-card-PlayButtonContainer,
-.Root .main-playButton-PlayButton,
-.Root .main-playButton-PlayButton > button,
-.Root .qqdeiPoFoM_sPX0pRHsT .SydbRAmFUdPUwVFV47xp .main-playButton-PlayButton > button {
-  transform: translate3d(0, 0, 0) !important;
-  will-change: opacity, transform !important;
-  backface-visibility: hidden !important;
-  transition: opacity 0.1s cubic-bezier(0, 0, 0.2, 1), transform 0.1s cubic-bezier(0, 0, 0.2, 1) !important;
-}
-
-.Root .qqdeiPoFoM_sPX0pRHsT .SydbRAmFUdPUwVFV47xp .main-playButton-PlayButton > button {
-  opacity: 0 !important;
-}
-
-.Root .qqdeiPoFoM_sPX0pRHsT:hover .SydbRAmFUdPUwVFV47xp .main-playButton-PlayButton > button,
-.Root .qqdeiPoFoM_sPX0pRHsT:focus-within .SydbRAmFUdPUwVFV47xp .main-playButton-PlayButton > button {
-  opacity: 1 !important;
-  transform: translate3d(0, 0, 0) scale(1.06) !important;
-}
-
-.Root .qqdeiPoFoM_sPX0pRHsT:hover .O6l0stovRqzSnYxDqSei,
-.Root .qqdeiPoFoM_sPX0pRHsT:focus-within .O6l0stovRqzSnYxDqSei {
-  opacity: 0 !important;
-}
-
-/* 4. Fix Carousel Row & Shelf Bottom Clipping Bug */
-div:has(> * > * > * > .main-card-cardContainer),
-div:has(> * > * > .main-card-cardContainer),
-div:has(> * > .main-card-cardContainer),
-div:has(> .main-card-cardContainer),
-[data-carousel-gridlist-item],
-[data-carousel-item-index],
-.main-shelf-shelfGrid > div {
-  overflow: visible !important;
-}
-
-.search-searchCategory-categoryGrid,
-.search-searchCategory-contentArea {
-  overflow-y: visible !important;
-}
-
-.Root .main-card-cardContainer,
-.Root .main-card-card {
-  height: auto !important;
-  min-height: 100% !important;
-  overflow: visible !important;
-  box-sizing: border-box !important;
-  padding-bottom: 14px !important;
-}
-
-/* 5. Fix Column Height Mismatch (Equalize main-view with sidebars) */
-.Root__main-view::before {
-  display: none !important;
-  box-shadow: none !important;
-}
-
-.Root .Root__main-view {
-  height: auto !important;
-  max-height: calc(100% - (var(--now-playing-bar-height, 90px) - 2rem)) !important;
-  border-radius: var(--border-radius-1, 8px) !important;
-  overflow: hidden !important;
-  margin-top: 0 !important;
-  margin-bottom: calc(var(--now-playing-bar-height, 90px) - 2rem) !important;
-}
-
-.Root .Root__nav-bar {
-  margin-top: 0 !important;
-  margin-bottom: calc(var(--now-playing-bar-height, 90px) - 2rem) !important;
-}
-
-.Root .Root__right-sidebar {
-  margin-top: 0 !important;
-  margin-bottom: calc(var(--now-playing-bar-height, 90px) - 2rem) !important;
-}
-
-/* 6. Fix Bottom Scroll Cutoff on Content and Album Pages (Clear floating player bar) */
-.Root .main-view-container__scroll-node-child,
-.Root main > div:first-child {
-  padding-bottom: calc(var(--now-playing-bar-height, 90px) + 3rem) !important;
 }
