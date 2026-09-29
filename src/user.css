@@ -2880,6 +2880,13 @@ div:has(> [data-testid="home-page"]) > div:nth-child(3) > div:first-child {
   justify-content: center;
 }
 
+/* Spotify 1.3's tall "Made for you" promotion cards (video backdrop) are new since Bloom, so they
+   missed Bloom's card outline and sat flat next to the outlined cards around them. They take the
+   same `border: 1px var(--spice-contour) solid` Bloom gives every card. */
+.cVUrew8My8kkbngH1iVp {
+  border: 1px var(--spice-contour) solid;
+}
+
 div:has(> [data-testid="home-page"]) > div:first-child,
 .playlist-playlist-actionBarBackground-background {
   background-image: none;
