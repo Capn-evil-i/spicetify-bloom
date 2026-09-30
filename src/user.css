@@ -2898,14 +2898,13 @@ div:has(> [data-testid="home-page"]) > div:nth-child(3) > div:first-child {
 }
 
 /* Card play button: Bloom's white glyph with a faint `drop-shadow(0 0 5px 30% black)` vanishes on
-   bright covers. On hover the bottom of the cover darkens slightly under it and the shadow is a
-   little firmer, so the glyph always reads, on white covers too. */
+   bright covers. On hover the cover darkens under it, strongly and most of the way up. */
 .main-card-imageContainer::after {
   content: "";
   position: absolute;
   inset: 0;
   border-radius: var(--border-radius-2);
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0) 55%);
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0) 80%);
   opacity: 0;
   transition: opacity 0.2s ease;
   pointer-events: none;
@@ -2917,49 +2916,8 @@ div:has(> [data-testid="home-page"]) > div:nth-child(3) > div:first-child {
   opacity: 1;
 }
 
-/* The glyph also sits on a small dark, blurred disc, so it reads on white artwork too (Discover
-   Weekly's white lettering). Bloom's drop shadow on the container is dropped: a filter on a parent
-   stops the disc's blur from seeing the cover behind it. */
 [dir="ltr"] .main-card-PlayButtonContainer {
   z-index: 2;
-  filter: none;
-}
-
-[data-encore-id="card"] .main-card-PlayButtonContainer .main-playButton-PlayButton,
-[data-encore-id="card"] .main-card-PlayButtonContainer .main-playButton-PlayButton:hover {
-  border-radius: 50%;
-  background-color: rgba(0, 0, 0, 0.4);
-  -webkit-backdrop-filter: blur(8px);
-  backdrop-filter: blur(8px);
-}
-
-/* Spotify 1.3's sticky page header (Home chips, playlist action bars) fades a 60% black `::after`
-   over its background as the page scrolls, so the header turned into a black band over Bloom's
-   background. The overlay is dropped; the header keeps Bloom's colour. */
-.RunOHD2OvEX6fHP1L_Gm::after {
-  display: none;
-}
-
-/* When home + search no longer fit across the whole bar at their full width, Spotify 1.3 packs
-   them against the left buttons, and Bloom's extra left buttons (Marketplace, custom apps) make
-   that happen at wide windows too. Down to 1100px wide, the bar keeps Spotify's own centred
-   layout and the search box narrows to the room between the button groups instead (the right
-   group is the wider one: its buttons plus the 10vw Spotify reserves for the window controls).
-   Narrower than that, there is no room to centre it and Spotify's packed layout takes over. */
-@media (min-width: 1100px) {
-  .Root__globalNav > .main-globalNav-searchSection {
-    position: absolute !important;
-    left: 0 !important;
-    right: 0 !important;
-    width: 100% !important;
-    justify-content: center !important;
-    pointer-events: none;
-  }
-
-  .Root__globalNav > .main-globalNav-searchSection > .main-globalNav-searchContainer {
-    width: min(546px, calc(100% - 2 * (10vw + 330px)));
-    min-width: 0;
-  }
 }
 
 /* Album page cover: tilts toward the pointer while it is over it. The bloom-compat extension sets
@@ -2971,8 +2929,12 @@ div:has(> [data-testid="home-page"]) > div:nth-child(3) > div:first-child {
   transition: transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
+/* Spotify's own hover rule on the (clickable) cover sets `transform: scale(1.02)`, which replaced the
+   tilt while the pointer was on it. The tilting state repeats the transform so it wins on hover. */
 .main-entityHeader-imageContainer.bloom-tilting,
 .main-entityHeader-imageContainerNew.bloom-tilting {
+  transform: perspective(700px) rotateX(var(--bloom-tilt-x, 0deg)) rotateY(var(--bloom-tilt-y, 0deg))
+    scale(var(--bloom-tilt-scale, 1));
   transition: transform 0.08s linear;
 }
 
