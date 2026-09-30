@@ -2938,6 +2938,14 @@ div:has(> [data-testid="home-page"]) > div:nth-child(3) > div:first-child {
   transition: transform 0.08s linear;
 }
 
+/* Spotify 1.3's editorial playlists (Discover Weekly and co.) have a banner image zoomed to 110%
+   behind the header. Bloom sets the main view to `overflow: visible` (written for 1.2, which had
+   no banner), so the zoomed banner spilled over the top bar gap and past both sides. The page is
+   clipped to its rounded box again, as in stock Spotify. */
+.Root__main-view > .main-view-container {
+  clip-path: inset(0 round var(--border-radius-1));
+}
+
 div:has(> [data-testid="home-page"]) > div:first-child,
 .playlist-playlist-actionBarBackground-background {
   background-image: none;
