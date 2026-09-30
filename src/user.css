@@ -2917,9 +2917,20 @@ div:has(> [data-testid="home-page"]) > div:nth-child(3) > div:first-child {
   opacity: 1;
 }
 
+/* The glyph also sits on a small dark, blurred disc, so it reads on white artwork too (Discover
+   Weekly's white lettering). Bloom's drop shadow on the container is dropped: a filter on a parent
+   stops the disc's blur from seeing the cover behind it. */
 [dir="ltr"] .main-card-PlayButtonContainer {
   z-index: 2;
-  filter: drop-shadow(0 1px 6px rgba(0 0 0 / 55%));
+  filter: none;
+}
+
+[data-encore-id="card"] .main-card-PlayButtonContainer .main-playButton-PlayButton,
+[data-encore-id="card"] .main-card-PlayButtonContainer .main-playButton-PlayButton:hover {
+  border-radius: 50%;
+  background-color: rgba(0, 0, 0, 0.4);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
 }
 
 /* Spotify 1.3's sticky page header (Home chips, playlist action bars) fades a 60% black `::after`
@@ -2949,6 +2960,20 @@ div:has(> [data-testid="home-page"]) > div:nth-child(3) > div:first-child {
     width: min(546px, calc(100% - 2 * (10vw + 330px)));
     min-width: 0;
   }
+}
+
+/* Album page cover: tilts toward the pointer while it is over it. The bloom-compat extension sets
+   the two angles; without it the cover simply stays flat. */
+.main-entityHeader-imageContainer,
+.main-entityHeader-imageContainerNew {
+  transform: perspective(700px) rotateX(var(--bloom-tilt-x, 0deg)) rotateY(var(--bloom-tilt-y, 0deg))
+    scale(var(--bloom-tilt-scale, 1));
+  transition: transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.main-entityHeader-imageContainer.bloom-tilting,
+.main-entityHeader-imageContainerNew.bloom-tilting {
+  transition: transform 0.08s linear;
 }
 
 div:has(> [data-testid="home-page"]) > div:first-child,
