@@ -34,5 +34,6 @@
   "_3s1DGSMxRHUVPuxgkoss": ".C8vlCbXzAR7qEMsoQG1r",
   "dPaa_Hg0z0Ql_UBrV9uZ": ".N6tht_GLY5suoRAtaggy",
   "loNizikBbaCKyI9Gv8xg": ".qrRT38O7gAArS1n8grcl",
-  "MZZCOz_ImVH1skMtX3aI": ".zYNpVrsABjnrvr7ZSJTd"
+  "MZZCOz_ImVH1skMtX3aI": ".zYNpVrsABjnrvr7ZSJTd",
+  "main-nowPlayingView-section": "[data-testid=\"lyrics-npv-section\"]"
 }
