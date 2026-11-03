@@ -5,6 +5,67 @@
   const SNIPPET_TITLE = "Bloom 1.3 compat";
   const SNIPPET_KEY = "marketplace:installed:snippet:" + SNIPPET_TITLE;
 
+  // Lyric lines carry only hashed classes, which change with every Spotify release, so the compat
+  // rules name them .bloom-token-lyrics-* and the real names are read from Spotify's stylesheet:
+  //   .L { color: var(--lyrics-color-inactive) }          a line
+  //   .L.X { color: var(--lyrics-color-active) }          the current line
+  //   .L.Y { color: var(--lyrics-color-inactive); opacity: .5 }   a sung line
+  //   .L.Z { color: var(--lyrics-color-inactive) } with a .L.Z:hover rule   an upcoming line
+  //   .L .S { color: var(--lyrics-color-active) }         a line with no current line (not synced)
+  function readLyricClasses() {
+    const rules = [];
+    const collect = (list) => {
+      for (const rule of list) {
+        if (rule.selectorText) rules.push(rule);
+        else if (rule.cssRules) collect(rule.cssRules);
+      }
+    };
+    for (const sheet of document.styleSheets) {
+      if (sheet.ownerNode && sheet.ownerNode.id === "bloom-13-compat-style") continue;
+      try {
+        collect(sheet.cssRules);
+      } catch (e) {
+        // A stylesheet from another origin; Spotify's own are readable.
+      }
+    }
+    const color = (rule) => rule.style.getPropertyValue("color").replace(/\s/g, "");
+    const ACTIVE = "var(--lyrics-color-active)";
+    const INACTIVE = "var(--lyrics-color-inactive)";
+    const lineRule = rules.find((r) => /^\.[\w-]+$/.test(r.selectorText) && r.style.length === 1 && color(r) === INACTIVE);
+    if (!lineRule) return null;
+    const line = lineRule.selectorText.slice(1);
+    const pair = new RegExp("^\\." + line + "\\.([\\w-]+)$");
+    const hover = new RegExp("^\\." + line + "\\.([\\w-]+):hover$");
+    const inner = new RegExp("^\\." + line + " \\.([\\w-]+)$");
+    const hoverable = new Set(rules.map((r) => (r.selectorText.match(hover) || [])[1]).filter(Boolean));
+    const found = { line };
+    for (const rule of rules) {
+      const own = rule.selectorText.match(pair);
+      if (own) {
+        if (color(rule) === ACTIVE) found.active = own[1];
+        else if (color(rule) === INACTIVE && rule.style.getPropertyValue("opacity")) found.passed = own[1];
+        else if (color(rule) === INACTIVE && hoverable.has(own[1])) found.future = own[1];
+      }
+      const child = rule.selectorText.match(inner);
+      if (child && color(rule) === ACTIVE) found.static = child[1];
+    }
+    return found;
+  }
+
+  let resolvedCss = null;
+  function compatCss() {
+    if (resolvedCss) return resolvedCss;
+    const classes = readLyricClasses();
+    // Spotify's stylesheet is not readable yet: use the rules as they are and try again on the next change.
+    if (!classes) return css;
+    // Read by compat/tools/coverage.js to check the lyric targets after an update.
+    window.bloomCompatLyricClasses = classes;
+    resolvedCss = css.replace(/\.bloom-token-lyrics-(line|active|passed|future|static)(?![\w-])/g, (token, name) =>
+      classes[name] ? "." + classes[name] : token,
+    );
+    return resolvedCss;
+  }
+
   // Marketplace puts Bloom's stylesheet in <body> after extensions run. The compat rules must come
   // after it, or Bloom wins every tie in specificity, so the style is moved behind Marketplace's.
   const MARKETPLACE_AFTER = "#bloom-13-compat-style ~ style.marketplaceCSS, #bloom-13-compat-style ~ style.marketplaceSnippets";
@@ -15,7 +76,8 @@
       style.id = "bloom-13-compat-style";
       document.body.appendChild(style);
     }
-    if (style.textContent !== css) style.textContent = css;
+    const text = compatCss();
+    if (style.textContent !== text) style.textContent = text;
     if (document.querySelector(MARKETPLACE_AFTER)) document.body.appendChild(style);
   }
 
@@ -33,15 +95,17 @@
     }
   }
 
-  // Album page cover tilt (angles for the rule in the compat section of src/user.css). The cover's box is measured when the
-  // pointer arrives, before it tilts, so the tilt does not feed back into the angles.
+  // Album page cover tilt (angles for the rule in the compat section of src/user.css). The cover's
+  // state is a data attribute, not a class: React rewrites className when the cover re-renders.
+  // box is measured when the pointer arrives, before it tilts, so the tilt does not feed back into
+  // the angles.
   const TILT_TARGET = __TILT_TARGET__;
   const MAX_TILT = 8;
   let tilted = null;
   let tiltBox = null;
   function untilt() {
     if (!tilted) return;
-    tilted.classList.remove("bloom-tilting");
+    tilted.removeAttribute("data-bloom-tilting");
     for (const name of ["--bloom-tilt-x", "--bloom-tilt-y", "--bloom-tilt-scale"]) tilted.style.removeProperty(name);
     tilted = null;
     tiltBox = null;
@@ -53,7 +117,7 @@
     if (!tiltBox) tiltBox = cover.getBoundingClientRect();
     const x = (evt.clientX - tiltBox.left) / tiltBox.width - 0.5;
     const y = (evt.clientY - tiltBox.top) / tiltBox.height - 0.5;
-    cover.classList.add("bloom-tilting");
+    cover.setAttribute("data-bloom-tilting", "");
     cover.style.setProperty("--bloom-tilt-x", (-y * 2 * MAX_TILT).toFixed(2) + "deg");
     cover.style.setProperty("--bloom-tilt-y", (x * 2 * MAX_TILT).toFixed(2) + "deg");
     cover.style.setProperty("--bloom-tilt-scale", "1.03");
@@ -61,6 +125,66 @@
   }, { passive: true });
   document.documentElement.addEventListener("mouseleave", untilt);
   window.addEventListener("blur", untilt);
+
+  // Press tilt, as in Spotify's phone app: a pressed album or playlist cover leans toward the point
+  // being pressed (the same direction as the hover tilt) and sinks a little until it is released.
+  // Presses on the buttons inside a card (play, more options) leave the card still.
+  const PRESS_TARGET = '[data-encore-id="card"], div:has(> [data-testid="shortcut-background"]), ' + TILT_TARGET;
+  const PRESS_TILT = 6;
+  let pressed = null;
+  function release() {
+    if (!pressed) return;
+    pressed.removeAttribute("data-bloom-pressing");
+    pressed.style.removeProperty("--bloom-press-x");
+    pressed.style.removeProperty("--bloom-press-y");
+    pressed = null;
+  }
+  document.addEventListener("pointerdown", (evt) => {
+    release();
+    if (evt.button !== 0 || !(evt.target instanceof Element)) return;
+    const target = evt.target.closest(PRESS_TARGET);
+    if (!target) return;
+    const button = evt.target.closest("button");
+    if (button && button !== target && target.contains(button)) return;
+    const box = target.getBoundingClientRect();
+    const x = (evt.clientX - box.left) / box.width - 0.5;
+    const y = (evt.clientY - box.top) / box.height - 0.5;
+    target.style.setProperty("--bloom-press-x", (-y * 2 * PRESS_TILT).toFixed(2) + "deg");
+    target.style.setProperty("--bloom-press-y", (x * 2 * PRESS_TILT).toFixed(2) + "deg");
+    target.setAttribute("data-bloom-pressing", "");
+    pressed = target;
+  }, { passive: true });
+  for (const type of ["pointerup", "pointercancel", "dragstart"]) document.addEventListener(type, release, { passive: true });
+  window.addEventListener("blur", release);
+
+  // Now Playing lyrics card: Spotify's "Lyrics preview" is a fixed excerpt from the start of the
+  // song. The card's synced view is opened instead and kept preview-sized while the page is marked
+  // compact (see the rules in src/user.css). Its button then reads "Show more" and opens the full
+  // synced view; "Show less" there returns Spotify to the preview, which reopens compact.
+  const NPV = '[data-testid="lyrics-npv-section"]';
+  const root = document.documentElement;
+  root.dataset.bloomLyricsCard = "compact";
+  function updateLyricsCard() {
+    const section = document.querySelector(NPV);
+    if (!section || section.querySelector(":scope > div:first-child button")) return;
+    const more = section.querySelector(':scope > div:last-child button[data-encore-id="buttonPrimary"]');
+    if (!more) return;
+    root.style.setProperty("--bloom-lyrics-more", JSON.stringify(more.textContent.trim()));
+    root.dataset.bloomLyricsCard = "compact";
+    more.click();
+  }
+  document.addEventListener(
+    "click",
+    (evt) => {
+      if (root.dataset.bloomLyricsCard !== "compact" || !(evt.target instanceof Element)) return;
+      const button = evt.target.closest(NPV + " > div:last-child button");
+      if (!button || !button.closest(NPV).querySelector(":scope > div:first-child button")) return;
+      evt.preventDefault();
+      evt.stopPropagation();
+      root.dataset.bloomLyricsCard = "full";
+    },
+    true,
+  );
 
   apply();
   dropSnippetCopy();
@@ -70,4 +194,13 @@
     apply();
     if (document.querySelector("style.marketplaceSnippets")?.textContent.includes("/* " + SNIPPET_TITLE + " - ")) dropSnippetCopy();
   }).observe(document.body, { childList: true });
+  new MutationObserver(apply).observe(document.head, { childList: true });
+  let lyricsFrame = 0;
+  new MutationObserver(() => {
+    if (lyricsFrame) return;
+    lyricsFrame = requestAnimationFrame(() => {
+      lyricsFrame = 0;
+      updateLyricsCard();
+    });
+  }).observe(document.body, { childList: true, subtree: true });
 })();

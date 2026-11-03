@@ -1,2 +1,5 @@
 node_modules
 package-lock.json
+
+# Written by compat/tools/coverage.js
+compat/tools/.last-coverage.json

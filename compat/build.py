@@ -1,8 +1,8 @@
 """Build the bloom-compat Spicetify extension from the compat section of src/user.css.
 
-Spotify 1.3.3 stopped rendering many of the readable class names Bloom's rules use (cards, the
-track list, the player bar...). compat/spotify-1.3.3.json maps each one to the element that took
-its place. This script copies every Bloom rule that uses a mapped class, in its original order,
+Spotify 1.3.3 and later stopped rendering many of the readable class names Bloom's rules use
+(cards, the track list, the player bar, lyrics...). compat/spotify-1.3.json maps each one to the
+element that took its place, using hooks that survive Spotify updates. This script copies every Bloom rule that uses a mapped class, in its original order,
 with each such class widened to `:is(.old, new)`, and writes those copies to the end of
 src/user.css between the GENERATED markers. The compat section (everything from COMPAT_START to
 the end of the file) is then wrapped into bloom-compat.js.
@@ -18,13 +18,15 @@ import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 USER_CSS = os.path.join(ROOT, "src", "user.css")
-MAP_FILE = os.path.join(ROOT, "compat", "spotify-1.3.3.json")
+MAP_FILE = os.path.join(ROOT, "compat", "spotify-1.3.json")
 TEMPLATE = os.path.join(ROOT, "compat", "bloom-compat.template.js")
 OUT = os.path.join(ROOT, "compat", "bloom-compat.js")
 
 COMPAT_START = "/* ===== Bloom -> Spotify 1.3 compatibility layer (generated) ====="
-GEN_START = "/* ===== GENERATED: Spotify 1.3.3 re-pointed rules (compat/build.py) ====="
-GEN_END = "/* ===== END GENERATED: Spotify 1.3.3 ===== */"
+GEN_START = "/* ===== GENERATED: Spotify 1.3 re-pointed rules (compat/build.py) ====="
+GEN_END = "/* ===== END GENERATED: Spotify 1.3 ===== */"
+# Earlier builds wrote "Spotify 1.3.3" markers; this prefix finds either.
+GEN_PREFIX = "/* ===== GENERATED: Spotify 1.3"
 TILT_BASE = ".main-entityHeader-imageContainer, .main-entityHeader-imageContainerNew"
 
 
@@ -118,15 +120,15 @@ def generate(css, mapping):
 def main():
     mapping = {k: v for k, v in json.load(open(MAP_FILE, encoding="utf-8")).items() if not k.startswith("_")}
     text = open(USER_CSS, encoding="utf-8").read()
-    if GEN_START in text:
-        text = text[:text.index(GEN_START)].rstrip() + "\n"
+    if GEN_PREFIX in text:
+        text = text[:text.index(GEN_PREFIX)].rstrip() + "\n"
     if COMPAT_START not in text:
         sys.exit("compat section not found in src/user.css")
 
     generated = generate(strip_comments(text), mapping)
     header = (
         GEN_START + "\n"
-        "   Spotify 1.3.3 no longer renders the readable classes listed in compat/spotify-1.3.3.json.\n"
+        "   Spotify 1.3.x no longer renders the readable classes listed in compat/spotify-1.3.json.\n"
         "   Each rule above that uses one is repeated here, in the same order, with that class widened\n"
         "   to also match the element that replaced it. Do not edit by hand: change the map or the\n"
         "   rules above and run compat/build.py. */\n"
