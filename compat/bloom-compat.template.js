@@ -12,7 +12,7 @@
   //   .L.Y { color: var(--lyrics-color-inactive); opacity: .5 }   a sung line
   //   .L.Z { color: var(--lyrics-color-inactive) } with a .L.Z:hover rule   an upcoming line
   //   .L .S { color: var(--lyrics-color-active) }         a line with no current line (not synced)
-  function readLyricClasses() {
+  function readRules() {
     const rules = [];
     const collect = (list) => {
       for (const rule of list) {
@@ -28,6 +28,10 @@
         // A stylesheet from another origin; Spotify's own are readable.
       }
     }
+    return rules;
+  }
+
+  function readLyricClasses(rules) {
     const color = (rule) => rule.style.getPropertyValue("color").replace(/\s/g, "");
     const ACTIVE = "var(--lyrics-color-active)";
     const INACTIVE = "var(--lyrics-color-inactive)";
@@ -52,18 +56,38 @@
     return found;
   }
 
+  // The sticky page header (Home chips, playlist action bars) darkens itself as the page scrolls with
+  //   .H.D::after { content: ""; background-color: rgba(0, 0, 0, 0.6); width: 100%; height: 100%; position: absolute }
+  // Its classes are hashed too; the compat rules name it .bloom-token-sticky-overlay.
+  function readStickyOverlay(rules) {
+    const rule = rules.find(
+      (r) =>
+        /^\.[\w-]+\.[\w-]+::after$/.test(r.selectorText) &&
+        r.style.getPropertyValue("background-color").replace(/\s/g, "") === "rgba(0,0,0,0.6)" &&
+        r.style.getPropertyValue("position") === "absolute" &&
+        r.style.getPropertyValue("height") === "100%",
+    );
+    return rule ? rule.selectorText.replace(/::after$/, "") : null;
+  }
+
   let resolvedCss = null;
   function compatCss() {
     if (resolvedCss) return resolvedCss;
-    const classes = readLyricClasses();
-    // Spotify's stylesheet is not readable yet: use the rules as they are and try again on the next change.
-    if (!classes) return css;
-    // Read by compat/tools/coverage.js to check the lyric targets after an update.
+    const rules = readRules();
+    const classes = readLyricClasses(rules);
+    const overlay = readStickyOverlay(rules);
+    // Read by compat/tools/coverage.js and reload.js to check the hashed targets after an update.
     window.bloomCompatLyricClasses = classes;
-    resolvedCss = css.replace(/\.bloom-token-lyrics-(line|active|passed|future|static)(?![\w-])/g, (token, name) =>
-      classes[name] ? "." + classes[name] : token,
-    );
-    return resolvedCss;
+    window.bloomCompatStickyOverlay = overlay;
+    const text = css
+      .replace(/\.bloom-token-lyrics-(line|active|passed|future|static)(?![\w-])/g, (token, name) =>
+        classes && classes[name] ? "." + classes[name] : token,
+      )
+      .replace(/\.bloom-token-sticky-overlay(?![\w-])/g, (token) => overlay || token);
+    // Spotify adds some stylesheets later (the sticky header's arrives with the first page that has
+    // one), so the rules are resolved again on the next change until every target is found.
+    if (classes && overlay) resolvedCss = text;
+    return text;
   }
 
   // Marketplace puts Bloom's stylesheet in <body> after extensions run. The compat rules must come
@@ -194,7 +218,12 @@
     apply();
     if (document.querySelector("style.marketplaceSnippets")?.textContent.includes("/* " + SNIPPET_TITLE + " - ")) dropSnippetCopy();
   }).observe(document.body, { childList: true });
-  new MutationObserver(apply).observe(document.head, { childList: true });
+  // A stylesheet's rules can only be read once it has loaded, after the <link> is added.
+  new MutationObserver((records) => {
+    apply();
+    for (const record of records)
+      for (const node of record.addedNodes) if (node.tagName === "LINK") node.addEventListener("load", apply, { once: true });
+  }).observe(document.head, { childList: true });
   let lyricsFrame = 0;
   new MutationObserver(() => {
     if (lyricsFrame) return;

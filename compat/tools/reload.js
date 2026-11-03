@@ -16,7 +16,8 @@ if (playingHere) {
         return JSON.stringify({
             ready: !!window.Spicetify?.Player,
             compatChars: text.length,
-            unresolvedTokens: [...new Set(text.match(/bloom-token-lyrics-\w+/g) || [])],
+            unresolvedTokens: [...new Set(text.replace(/\/\*[\s\S]*?\*\//g, "").match(/bloom-token-[\w-]+/g) || [])],
+            stickyOverlay: window.bloomCompatStickyOverlay,
             lyricsCard: document.documentElement.dataset.bloomLyricsCard,
             lastInBody: document.body.lastElementChild?.id,
         });
