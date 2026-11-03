@@ -3465,6 +3465,17 @@ form.e-10860-form-input-icon[role="search"] {
   translate: calc(12px - 0.25rem) 0;
 }
 
+/* Search's "Browse all" tiles: Spotify spaces them with 12px of padding around each one (24px apart)
+   and outdents the grid by the same 12px. Bloom's grid gap spaces them instead, 8px as on card grids,
+   with the tiles on the content edges. */
+#main-view [role="list"]:has(> [role="listitem"] > a[href^="/genre/"]) {
+  margin-inline: 0;
+}
+
+#main-view [role="list"]:has(> [role="listitem"] > a[href^="/genre/"]) > [role="listitem"] {
+  padding: 0;
+}
+
 /* Bloom borders the Home shortcut tiles, which made each tile 1.6px taller than its grid row: the gap
    between rows came out at 6.4px against 8px between columns. The border is drawn inside the tile. */
 div:has(> [data-testid="shortcut-background"]) {
@@ -3625,24 +3636,27 @@ div:has(> [data-testid="shortcut-background"]) {
 .main-cardImage-image, .main-cardImage-imageWrapper, :is(.main-card-card, [data-encore-id="card"]) img {
   border-radius: var(--border-radius-2);
 }
-:is(.main-card-card, [data-encore-id="card"]), .x-heroCategoryCard-HeroCategoryCard, .x-categoryCard-CategoryCard, .x-categoryCard-image, .main-heroCard-card, .view-homeShortcutsGrid-draggable {
+:is(.main-card-card, [data-encore-id="card"]), .x-heroCategoryCard-HeroCategoryCard, :is(.x-categoryCard-CategoryCard, #main-view [role="list"]:has(> [role="listitem"] > a[href^="/genre/"]) > [role="listitem"] > a > div), :is(.x-categoryCard-image, #main-view [role="list"]:has(> [role="listitem"] > a[href^="/genre/"]) > [role="listitem"] > a > div > img), .main-heroCard-card, .view-homeShortcutsGrid-draggable {
   border-radius: var(--border-radius-1);
 }
-:is(.main-card-card, [data-encore-id="card"]):hover, .x-categoryCard-CategoryCard:hover, .main-heroCard-card:hover {
+:is(.main-card-card, [data-encore-id="card"]):hover, :is(.x-categoryCard-CategoryCard, #main-view [role="list"]:has(> [role="listitem"] > a[href^="/genre/"]) > [role="listitem"] > a > div):hover, .main-heroCard-card:hover {
   transform: translateY(-3px);
   box-shadow: 0 4px 16px rgba(var(--spice-rgb-layer-shadow), 0.5) !important;
 }
-:is(.main-card-card, [data-encore-id="card"]):hover::after, .x-categoryCard-CategoryCard:hover::after, .main-heroCard-card:hover::after {
+:is(.main-card-card, [data-encore-id="card"]):hover::after, :is(.x-categoryCard-CategoryCard, #main-view [role="list"]:has(> [role="listitem"] > a[href^="/genre/"]) > [role="listitem"] > a > div):hover::after, .main-heroCard-card:hover::after {
   transform: translateY(0px);
 }
-:is(.main-card-card, [data-encore-id="card"]):active, .x-categoryCard-CategoryCard:active, .main-heroCard-card:active {
+:is(.main-card-card, [data-encore-id="card"]):active, :is(.x-categoryCard-CategoryCard, #main-view [role="list"]:has(> [role="listitem"] > a[href^="/genre/"]) > [role="listitem"] > a > div):active, .main-heroCard-card:active {
   transform: translateY(0px);
 }
-.x-searchResultsTracks-root>:is(.main-gridContainer-gridContainer, #main-view [role="presentation"]:has(> [data-encore-id="card"], > div > [data-encore-id="card"])), :is(.main-trackList-trackList, #main-view [role="grid"][aria-colcount]), :is(.main-card-card, [data-encore-id="card"]), .main-heroCard-card, :is(.main-card-cardContainer, [data-encore-id="card"]), .view-homeShortcutsGrid-draggable {
+.x-searchResultsTracks-root>:is(.main-gridContainer-gridContainer, #main-view [role="presentation"]:has(> [data-encore-id="card"], > div > [data-encore-id="card"]), #main-view [role="list"]:has(> [role="listitem"] > a[href^="/genre/"])), :is(.main-trackList-trackList, #main-view [role="grid"][aria-colcount]), :is(.main-card-card, [data-encore-id="card"]), .main-heroCard-card, :is(.main-card-cardContainer, [data-encore-id="card"]), .view-homeShortcutsGrid-draggable {
   background-color: var(--spice-card);
   border: 1px var(--spice-contour) solid;
 }
-:is(.main-card-card, [data-encore-id="card"]), .x-categoryCard-CategoryCard, .main-heroCard-card {
+:is(.x-categoryCard-title, #main-view [role="list"]:has(> [role="listitem"] > a[href^="/genre/"]) > [role="listitem"] > a > div > [data-encore-id="text"]), .x-heroCategoryCard-heroTitle, .collection-collectionEntityHeroCard-likedSongs div {
+  color: white;
+}
+:is(.main-card-card, [data-encore-id="card"]), :is(.x-categoryCard-CategoryCard, #main-view [role="list"]:has(> [role="listitem"] > a[href^="/genre/"]) > [role="listitem"] > a > div), .main-heroCard-card {
   transition: transform 400ms var(--ms-motion-timing-decelerate), box-shadow 400ms var(--ms-motion-timing-decelerate);
 }
 .Root__top-container:not(:has(.main-topBar-container)) :is(.Root__main-view, [id="main-view"])::after {
@@ -3698,10 +3712,10 @@ div:has(> [data-testid="shortcut-background"]) {
   height: 24px !important;
   margin-right: 0.5rem;
 }
-.x-searchResultsTracks-root :is(.main-gridContainer-gridContainer, #main-view [role="presentation"]:has(> [data-encore-id="card"], > div > [data-encore-id="card"])) {
+.x-searchResultsTracks-root :is(.main-gridContainer-gridContainer, #main-view [role="presentation"]:has(> [data-encore-id="card"], > div > [data-encore-id="card"]), #main-view [role="list"]:has(> [role="listitem"] > a[href^="/genre/"])) {
   padding: 8px;
 }
-.main-heroCard-card, .x-searchResultsTracks-root :is(.main-gridContainer-gridContainer, #main-view [role="presentation"]:has(> [data-encore-id="card"], > div > [data-encore-id="card"])) {
+.main-heroCard-card, .x-searchResultsTracks-root :is(.main-gridContainer-gridContainer, #main-view [role="presentation"]:has(> [data-encore-id="card"], > div > [data-encore-id="card"]), #main-view [role="list"]:has(> [role="listitem"] > a[href^="/genre/"])) {
   background-color: var(--spice-card);
   border-radius: var(--border-radius-1);
 }
@@ -3846,6 +3860,9 @@ div:has(> [data-testid="shortcut-background"]) {
 :is(.main-playButton-PlayButton, [role="div"]:has(> [data-encore-id="buttonPrimary"]))>button>span {
   display: none;
 }
+.a2ruVaZt_DdrdHz3GqgU, :is(.x-categoryCard-CategoryCard, #main-view [role="list"]:has(> [role="listitem"] > a[href^="/genre/"]) > [role="listitem"] > a > div) {
+  color: var(--spice-alt-text);
+}
 :is(.main-nowPlayingView-section, [data-testid="lyrics-npv-section"]) .lyrics-lyricsContent-lyric {
   opacity: 1;
   visibility: visible;
@@ -3882,7 +3899,7 @@ body:has(#lyrics-fullscreen-container)>#main>.Root>.Root__top-container>*:not(:i
 .main-trackList-trackListHeaderStuck:is(.main-trackList-trackListHeader, #main-view [role="grid"][aria-colcount] > div:has([role="columnheader"])) {
   background: transparent;
 }
-:is(.main-gridContainer-gridContainer, #main-view [role="presentation"]:has(> [data-encore-id="card"], > div > [data-encore-id="card"])) {
+:is(.main-gridContainer-gridContainer, #main-view [role="presentation"]:has(> [data-encore-id="card"], > div > [data-encore-id="card"]), #main-view [role="list"]:has(> [role="listitem"] > a[href^="/genre/"])) {
   gap: 0.5rem; a { padding: 0; .Vn9yz8P5MjIvDT8c0U6w::before { content: ""; height: 100%; width: 100%; display: block; position: absolute; background: linear-gradient(120deg, transparent, var(--spice-main)); } }
 }
 :is(.main-topBar-historyButtons, #global-nav-bar div:has(> button[aria-label="Go back"]))>button:nth-child(1), :is(.main-topBar-historyButtons, #global-nav-bar div:has(> button[aria-label="Go back"]))>button:nth-child(2), .main-devicePicker-header>.main-devicePicker-nowPlayingActiveIcon[src*="equaliser"], [data-testid="control-button-playback-speed"], :is(.player-controls, [data-testid="player-controls"]) [data-testid="control-button-repeat"], .player-controls__left>button:first-child, .main-playButton-button, :is(.main-playButton-PlayButton, [role="div"]:has(> [data-encore-id="buttonPrimary"]))>button, :is(.main-trackList-rowPlayPauseButton, #main-view [role="grid"][aria-colcount] [role="gridcell"][aria-colindex="1"] button), .main-yourLibraryX-collapseButton svg {
